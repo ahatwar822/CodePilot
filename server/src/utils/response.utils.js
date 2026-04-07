@@ -55,3 +55,7 @@ export function serverError(res, message = 'Internal Server Error', data = {}) {
 export function notImplemented(res, message = 'Not Implemented', data = {}) {
     sendResponse(res, 501, false, message, data);
 }
+
+export function customError(res , data ={}, status = 500, message = "Error") {
+  sendResponse(res, status, false, message, data);
+}
