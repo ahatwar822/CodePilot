@@ -11,7 +11,7 @@ const createFileController = async (req, res) => {
         const currentDir = path.resolve() + '/assets';
         const filePath = path.join(currentDir, fileName);
 
-        await fs.writeFile(filePath, '', (err) => {
+         fs.writeFile(filePath, '', (err) => {
             if(err){
                 return customError(res, {}, 500, "Error creating file");
             }
@@ -27,7 +27,7 @@ const createFileController = async (req, res) => {
 
 const readFileController = async (req, res) => {
     try {
-        const { fileName } = req.query;
+        const { fileName } = req.params;
         if (!fileName) {
             return customError(res, {}, 400, "file name is required");
         }
@@ -46,6 +46,21 @@ const readFileController = async (req, res) => {
         return serverError(res, "Internal Server Error while reading file", { error: error.message });
     }
 
+}
+
+const getAllFilesController = async(req,res) => {
+    try {
+        const currentDir = path.resolve() + '/assets';
+        fs.readdir(currentDir, (err, files) => {
+            if(err){
+                return customError(res, {}, 500, "Error getting files");
+            }
+            return success(res, { files });
+        })
+        
+    } catch (error) {
+        return serverError(res, "Internal Server Error while getting all files", { error: error.message });
+    }
 }
 
 const updateFileController = async (req, res) => {
@@ -74,7 +89,7 @@ const updateFileController = async (req, res) => {
 
 const deleteFileController = async (req, res) => {
     try {
-        const { fileName } = req.body;
+        const { fileName } = req.params;
         if (!fileName) {
             return customError(res, {}, 400, "File name is required");
         }
@@ -98,6 +113,7 @@ const deleteFileController = async (req, res) => {
 export {
     createFileController,
     readFileController,
+    getAllFilesController,
     updateFileController,
     deleteFileController
 }
