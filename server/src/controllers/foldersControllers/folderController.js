@@ -31,7 +31,7 @@ const createFolderController = async (req, res) => {
 
 const openFolderController = async (req, res) => {
     try {
-        const { folderName } = req.query;
+        const { folderName } = req.params;
         if (!folderName) {
             return customError(res, {}, 400, "Folder name is required");
         }
@@ -54,6 +54,21 @@ const openFolderController = async (req, res) => {
         
     } catch (error) {
         return serverError(res, 'Error opening folder', { error: error.message });
+    }
+}
+
+const getAllFoldersController = async (req, res) => {
+    try {
+        const currentDir = path.resolve() + '/assets';
+        fs.readdir(currentDir, (err, folders) => {
+            if(err){
+                return customError(res, {}, 500, "Error getting folders");
+            }
+            return success(res, { folders });
+        })
+        
+    } catch (error) {
+        return serverError(res, 'Error getting folders', { error: error.message });
     }
 }
 
@@ -85,7 +100,7 @@ const renameFolderController = async (req, res ) => {
 
 const deleteFolderController = async (req, res) => {
     try {
-        const { folderName } = req.body;
+        const { folderName } = req.params;
         if (!folderName) {
             return customError(res, {}, 400, "Folder name is required");
         }
@@ -109,6 +124,7 @@ const deleteFolderController = async (req, res) => {
 export {
     createFolderController,
     openFolderController,
+    getAllFoldersController,
     renameFolderController,
     deleteFolderController
 }
