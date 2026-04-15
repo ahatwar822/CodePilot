@@ -19,7 +19,7 @@ const isAuthenticated = async (req, res, next) => {
             // Try to verify access token
             const decoded = jwt.verify(
                 accessToken,
-                process.env.ACCESS_TOKEN_SECRET || 'access-secret-key'
+                process.env.ACCESS_TOKEN_SECRET 
             );
             
             req.userId = decoded.userId;
@@ -38,7 +38,7 @@ const isAuthenticated = async (req, res, next) => {
                     // Verify refresh token
                     const decoded = jwt.verify(
                         refreshToken,
-                        process.env.REFRESH_TOKEN_SECRET || 'refresh-secret-key'
+                        process.env.REFRESH_TOKEN_SECRET 
                     );
 
                     // Validate refresh token against database
@@ -55,7 +55,7 @@ const isAuthenticated = async (req, res, next) => {
                     // Generate new access token
                     const newAccessToken = jwt.sign(
                         { userId: user._id },
-                        process.env.ACCESS_TOKEN_SECRET || 'access-secret-key',
+                        process.env.ACCESS_TOKEN_SECRET,
                         { expiresIn: '15m' }
                     );
 
