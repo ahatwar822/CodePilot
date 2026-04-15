@@ -1,4 +1,3 @@
-
 import { badRequest, success } from '../../utils/response.utils.js';
 import Folder from '../../models/folder.model.js';
 
@@ -33,12 +32,14 @@ const getAllFoldersController = async (req, res, next) => {
 
 const openFolderController = async (req, res, next) => {
     try {
-        const { folderName } = req.params;
+        const { folderId } = req.params;
 
         const folder = await Folder.findOne({
-            name: folderName,
+            _id: folderId,
             user: req.userId,
         });
+
+        if (!folder) return customError(res, 404, "Folder not found");
 
         return success(res, folder, "Folder opened");
     } catch (err) {
@@ -50,6 +51,8 @@ const renameFolderController = async (req, res, next) => {
     try {
         const { folderId } = req.params;
         const { newName } = req.body;
+
+        if (!newName) return badRequest(res, "Folder name required");
 
         await Folder.findOneAndUpdate({
             _id: folderId,
@@ -67,10 +70,12 @@ const deleteFolderController = async (req, res, next) => {
     try {
         const { folderId } = req.params;
 
-        await Folder.findOneAndDelete({
+        const folder = await Folder.findOneAndDelete({
             _id: folderId,
             user: req.userId,
         });
+
+        if (!folder) return customError(res, "Folder not found");
 
         return success(res, {}, "Folder deleted");
     } catch (err) {
