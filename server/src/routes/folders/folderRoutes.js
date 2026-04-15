@@ -7,7 +7,7 @@ folderRouter.post('/create', createFolderController);
 folderRouter.get('/open/:folderName', openFolderController);
 folderRouter.get('/', getAllFoldersController);
 folderRouter.put('/rename', renameFolderController);
-folderRouter.delete('/delete/:folderName', deleteFolderController);
+folderRouter.delete('/delete/:folderId', deleteFolderController);
 
 
 export default folderRouter;

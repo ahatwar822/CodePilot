@@ -7,6 +7,6 @@ fileRouter.post('/create', createFileController);
 fileRouter.get('/read/:fileName',readFileController);
 fileRouter.get('/',getAllFilesController);
 fileRouter.put('/update', updateFileController);
-fileRouter.delete('/delete/:fileName',deleteFileController);
+fileRouter.delete('/delete/:fileId',deleteFileController);
 
 export default fileRouter;
