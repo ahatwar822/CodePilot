@@ -1,5 +1,5 @@
 import userModel from "../../models/user.model.js";
-import { customError, serverError, success } from "../../utils/response.utils.js";
+import { conflict, customError, serverError, success } from "../../utils/response.utils.js";
 import jwt from 'jsonwebtoken';
 
 const generateTokens = (userId) => {
@@ -35,7 +35,7 @@ const registerController = async (req, res) => {
         // Check if user exists
         const isExistUser = await userModel.findOne({ email });
         if (isExistUser) {
-            return customError(res, 409, "User already exists with this email.");
+            return conflict(res, "Email already registered.");
         }
 
         // Create new user
