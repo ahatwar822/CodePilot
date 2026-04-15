@@ -1,11 +1,11 @@
 import express from 'express'
 import { success } from '../../utils/response.utils.js';
+import isAuthenticated from '../../middlewares/isAuthenticated.js';
+import { getAuthenticatedUser } from '../../controllers/userControllers/user.controller.js';
 
 const userRouter = express.Router();
 
-userRouter.get('/', (req, res) => {
-    return success(res, { message: 'User route is working!' });
-})
+userRouter.get('/me', isAuthenticated, getAuthenticatedUser )
 
 
 export default userRouter;
