@@ -1,112 +1,96 @@
-import fs from 'fs'
-import { customError, deleted, serverError, success, updated } from '../../utils/response.utils.js'
-import path from 'path';
+import File from '../../models/file.model.js'
+import { badRequest, customError, deleted, success, updated } from '../../utils/response.utils.js'
 
-const createFileController = async (req, res) => {
+
+const createFileController = async (req, res, next) => {
     try {
-        const {fileName} = req.body;
-        if (!fileName) {
-            return customError(res, {}, 400, "File name is required");
-        }
-        const currentDir = path.resolve() + '/assets';
-        const filePath = path.join(currentDir, fileName);
+        const { name, folder, language } = req.body;
 
-         fs.writeFile(filePath, '', (err) => {
-            if(err){
-                return customError(res, {}, 500, "Error creating file");
-            }
+        if (!name) return badRequest(res, "File name required");
 
-            return success(res, { message: 'File created successfully' });
-        })
-        
-    } catch (error) {
-        return serverError(res, "Internal SError while creating file", { error: error.message });
+        const file = await File.create({
+            name,
+            folder: folder || null,
+            language,
+            user: req.userId,
+        });
+
+        return success(res, file, "File created");
+    } catch (err) {
+        next(err);
     }
 
 }
 
-const readFileController = async (req, res) => {
+const readFileController = async (req, res, next) => {
     try {
-        const { fileName } = req.params;
-        if (!fileName) {
-            return customError(res, {}, 400, "file name is required");
-        }
-        const currentDir = path.resolve() + '/assets';
-        const filePath = path.join(currentDir, fileName);
-        if (!fs.existsSync(filePath)) {
-            return customError(res, {}, 404, "File not found");
-        }
-        fs.readFile(filePath, 'utf-8', (err, data) => {
-            if (err) {
-                return customError(res, {}, 500, "Error reading file");
-            }
-            return success(res, { data });
-        })
-    } catch (error) {
-        return serverError(res, "Internal Server Error while reading file", { error: error.message });
+        const { fileId } = req.params;
+
+        const file = await File.findOne({ _id: fileId, user: req.userId });
+
+        if (!file) return customError(res, 404, "File not found");
+
+        return success(res, file, "File read");
+    } catch (err) {
+        next(err);
     }
 
 }
 
-const getAllFilesController = async(req,res) => {
+const getAllFilesController = async (req, res, next) => {
     try {
-        const currentDir = path.resolve() + '/assets';
-        fs.readdir(currentDir, (err, files) => {
-            if(err){
-                return customError(res, {}, 500, "Error getting files");
-            }
-            return success(res, { files });
-        })
-        
-    } catch (error) {
-        return serverError(res, "Internal Server Error while getting all files", { error: error.message });
+        const files = await File.find({ user: req.userId });
+
+        return success(res, files, "Files fetched");
+    } catch (err) {
+        next(err);
     }
 }
 
-const updateFileController = async (req, res) => {
+const updateFileController = async (req, res, next) => {
     try {
-        const { fileName, content } = req.body;
-        if (!fileName || !content) {
-            return customError(res, {}, 400, "File name and content are required");
+        const { fileId } = req.params;
+        const { content } = req.body;
+
+        if (!fileId) return badRequest(res, "File id required");
+
+        if (!content) return badRequest(res, "File content required");
+
+        if (content === undefined) {
+            return badRequest(res, "File content required");
         }
-        const currentDir = path.resolve() + '/assets';
-        const filePath = path.join(currentDir, fileName);
-        if (!fs.existsSync(filePath)) {
-            return customError(res, {}, 404, "File not found");
-        }
-        fs.writeFile(filePath, content, (err) => {
-            if (err) {
-                return customError(res, {}, 500, "Error updating file");
-            }
-            return updated(res, { message: 'File updated successfully' });
-        })
-        
-    } catch (error) {
-        return serverError(res, "Internal Server Error while updating file", { error: error.message });
+
+        const file = await File.findOneAndUpdate(
+            { _id: fileId, user: req.userId },
+            { content },
+            { new: true }
+        );
+
+        if (!file) return customError(res, 404, "File not found");
+
+        return updated(res, file, "File updated");
+    } catch (err) {
+        next(err);
     }
 
 }
 
-const deleteFileController = async (req, res) => {
+const deleteFileController = async (req, res, next) => {
     try {
-        const { fileName } = req.params;
-        if (!fileName) {
-            return customError(res, {}, 400, "File name is required");
-        }
-        const currentDir = path.resolve() + "/assets";
-        const filePath = path.join(currentDir, fileName);
-        if (!fs.existsSync(filePath)) {
-            return customError(res, {}, 404, "File not found");
-        }
-        fs.unlink(filePath, (err) => {
-            if(err){
-                return customError(res, {}, 500, "Error deleting file");
-            }
-            return deleted(res, { message: 'File deleted successfully' });
-        })
-        
-    } catch (error) {
-        return serverError(res, "Internal Server Error while deleting file", { error: error.message });
+        const { fileId } = req.params;
+
+        if (!fileId) return badRequest(res, "File id required");
+
+        const file = await File.findOneAndDelete({
+            _id: fileId,
+            user: req.userId,
+        });
+
+        if (!file) return customError(res, 404, "File not found");
+
+        return deleted(res, {}, "File deleted");
+    } catch (err) {
+        next(err);
     }
 }
 

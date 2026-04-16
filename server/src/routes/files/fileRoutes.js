@@ -3,10 +3,10 @@ import { createFileController, deleteFileController, getAllFilesController, read
 
 const fileRouter = express.Router();
 
-fileRouter.post('/create', createFileController);
-fileRouter.get('/read/:fileName',readFileController);
+fileRouter.post('/', createFileController);
 fileRouter.get('/',getAllFilesController);
-fileRouter.put('/update', updateFileController);
-fileRouter.delete('/delete/:fileName',deleteFileController);
+fileRouter.get('/:fileId',readFileController);
+fileRouter.put('/:fileId', updateFileController);
+fileRouter.delete('/:fileId',deleteFileController);
 
 export default fileRouter;

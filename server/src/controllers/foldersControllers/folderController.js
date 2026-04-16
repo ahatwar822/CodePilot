@@ -1,123 +1,85 @@
-import fs from 'fs'
-import path from 'path';
-import { customError, serverError, success } from '../../utils/response.utils.js';
-// export const createFolderController = async(req, res) => {
-//     try {
-//         const { folderName } = req.body;
-//         await fs.promises.mkdir(folderName);
-//         res.status(201).json({ message: 'Folder created successfully' });
-//     } catch (error) {
-//         console.log("error in folder controller", error);
-//     }
-// }
+import { badRequest, success } from '../../utils/response.utils.js';
+import Folder from '../../models/folder.model.js';
 
-const createFolderController = async (req, res) => {
+
+const createFolderController = async (req, res, next) => {
     try {
-        const { folderName } = req.body;
-        const currentDir = path.resolve() + '/assets';
-        const folderPath = path.join(currentDir, folderName);
+        const { name, parentFolder } = req.body;
 
-        fs.mkdir(folderPath, { recursive: true }, (err) => {
-            if (err) {
-                console.error('Error creating folder:', err);
-                return res.status(500).json({ message: 'Error creating folder' });
-            }
-            return success(res, { message: 'Folder created successfully' });
+        if (!name) return badRequest(res, "Folder name required");
+
+        const folder = await Folder.create({
+            name,
+            parentFolder: parentFolder || null,
+            user: req.userId,
         });
-    } catch (error) {
-        return serverError(res, 'Error creating folder', { error: error.message });
+
+        return success(res, folder, "Folder created");
+    } catch (err) {
+        next(err);
     }
 }
 
-const openFolderController = async (req, res) => {
+const getAllFoldersController = async (req, res, next) => {
     try {
-        const { folderName } = req.params;
-        if (!folderName) {
-            return customError(res, {}, 400, "Folder name is required");
-        }
-        const currentDir = path.resolve() + '/assets';
-        const folderPath = path.join(currentDir, folderName);
+        const folders = await Folder.find({ user: req.userId });
 
-        if (!fs.existsSync(folderPath)) {
-            return customError(res, {}, 404, "Folder not found");
-        }
-        fs.readdir(folderPath, (err, files) => {
-            if(err){
-                return customError(res, {}, 500, "Error opening folder");
-            }
-            if (files.length === 0) {
-                return success(res, { message: 'Folder is empty' });
-            } else {
-                return success(res, { files });
-            }
-        })
-        
-    } catch (error) {
-        return serverError(res, 'Error opening folder', { error: error.message });
+        return success(res, folders, "Folders fetched");
+    } catch (err) {
+        next(err);
     }
 }
 
-const getAllFoldersController = async (req, res) => {
+const openFolderController = async (req, res, next) => {
     try {
-        const currentDir = path.resolve() + '/assets';
-        fs.readdir(currentDir, (err, folders) => {
-            if(err){
-                return customError(res, {}, 500, "Error getting folders");
-            }
-            return success(res, { folders });
-        })
-        
-    } catch (error) {
-        return serverError(res, 'Error getting folders', { error: error.message });
+        const { folderId } = req.params;
+
+        const folder = await Folder.findOne({
+            _id: folderId,
+            user: req.userId,
+        });
+
+        if (!folder) return customError(res, 404, "Folder not found");
+
+        return success(res, folder, "Folder opened");
+    } catch (err) {
+        next(err);
     }
 }
 
-const renameFolderController = async (req, res ) => {
+const renameFolderController = async (req, res, next) => {
     try {
-        
-        const { oldFolderName, newFolderName } = req.body;
-        if (!oldFolderName || !newFolderName) {
-            return customError(res, {}, 400, "All fields are required");
-        }
-        const currentDir = path.resolve() + '/assets';
-        const oldFolderPath = path.join(currentDir, oldFolderName);
-        const newFolderPath = path.join(currentDir, newFolderName);
+        const { folderId } = req.params;
+        const { newName } = req.body;
 
-        if (!fs.existsSync(oldFolderPath)) {
-            return customError(res, {}, 404, "Folder not found");
-        }
-        fs.rename(oldFolderPath, newFolderPath, (err) => {
-            if(err){
-                return customError(res, {}, 500, "Error renaming folder");
-            }
-            return success(res, { message: 'Folder renamed successfully' });
-        })
+        if (!newName) return badRequest(res, "Folder name required");
 
-    } catch (error) {
-        return serverError(res, 'Internal SError while renaming folder', { error: error.message });
+        await Folder.findOneAndUpdate({
+            _id: folderId,
+            user: req.userId,
+        }, {
+            name: newName,
+        });
+
+        return success(res, {}, "Folder renamed");
+    } catch (err) {
+        next(err);
     }
 }
-
-const deleteFolderController = async (req, res) => {
+const deleteFolderController = async (req, res, next) => {
     try {
-        const { folderName } = req.params;
-        if (!folderName) {
-            return customError(res, {}, 400, "Folder name is required");
-        }
-        const currentDir = path.resolve() + '/assets';
-        const folderPath = path.join(currentDir, folderName);
-        if (!fs.existsSync(folderPath)) {
-            return customError(res, {}, 404, "Folder not found");
-        }
-        fs.rmdir(folderPath, { recursive: true }, (err) => {
-            if(err){
-                return customError(res, {}, 500, "Error deleting folder");
-            }
-            return success(res, { message: 'Folder deleted successfully' });
-        })
-        
-    } catch (error) {
-        return serverError(res, 'Internal Server Error while deleting folder', { error: error.message });
+        const { folderId } = req.params;
+
+        const folder = await Folder.findOneAndDelete({
+            _id: folderId,
+            user: req.userId,
+        });
+
+        if (!folder) return customError(res, "Folder not found");
+
+        return success(res, {}, "Folder deleted");
+    } catch (err) {
+        next(err);
     }
 }
 
