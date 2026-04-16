@@ -56,6 +56,6 @@ export function notImplemented(res, message = 'Not Implemented', data = {}) {
     sendResponse(res, 501, false, message, data);
 }
 
-export function customError(res , data ={}, status = 500, message = "Error") {
+export function customError(res, status = 500, message = "Error", data = {}) {
   sendResponse(res, status, false, message, data);
 }

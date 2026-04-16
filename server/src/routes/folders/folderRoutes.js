@@ -3,11 +3,11 @@ import { createFolderController, deleteFolderController, getAllFoldersController
 
 const folderRouter = express.Router();
 
-folderRouter.post('/create', createFolderController);
-folderRouter.get('/open/:folderName', openFolderController);
+folderRouter.post('/', createFolderController);
 folderRouter.get('/', getAllFoldersController);
-folderRouter.put('/rename', renameFolderController);
-folderRouter.delete('/delete/:folderName', deleteFolderController);
+folderRouter.get('/:folderId', openFolderController);
+folderRouter.put('/:folderId', renameFolderController);
+folderRouter.delete('/:folderId', deleteFolderController);
 
 
 export default folderRouter;
