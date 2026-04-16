@@ -3,6 +3,6 @@ import { aiChatController } from '../../controllers/AiControllers/ai.controller.
 
 const aiRouter = express.Router();
 
-aiRouter.get("/:chat", aiChatController);
+aiRouter.post("/chat", aiChatController);
 
 export default aiRouter;

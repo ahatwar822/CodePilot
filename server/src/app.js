@@ -3,6 +3,7 @@ import errorMiddleware from './middlewares/error.middleware.js';
 import logger from 'morgan'
 import router from './routes/allRoutes.js';
 import cookieparser from 'cookie-parser'
+import { notFound } from './utils/response.utils.js';
 
 const app = express();
 
