@@ -6,10 +6,11 @@ export const EditorProvider = ({ children }) => {
     const [code, setCode] = useState("");
     const [suggestion, setSuggestion] = useState("");
     const [loading, setLoading] = useState(false);
+    const [language, setLanguage] = useState("javascript");
 
     return (
         <EditorContext.Provider
-            value={{ code, setCode, suggestion, setSuggestion, loading, setLoading }}
+            value={{ code, setCode, suggestion, setSuggestion, loading, setLoading, language, setLanguage }}
         >
             {children}
         </EditorContext.Provider>
