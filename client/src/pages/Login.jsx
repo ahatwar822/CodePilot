@@ -12,7 +12,7 @@ const Login = () => {
     try {
       const res = await api.post("/auth/login", form);
       setUser(res.data.data.user);
-      navigate("/");
+      navigate("/editor");
     } catch (err) {
       alert(err.response?.data?.message || "Login failed");
     }

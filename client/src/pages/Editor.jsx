@@ -4,17 +4,17 @@ import CopilotPanel from '../components/CopilotPanel'
 
 const Editor = () => {
   return (
-    <div className="h-screen flex bg-[#1e1e1e] text-white">
+    <div className="h-screen w-screen flex bg-[#1e1e1e] text-white overflow-hidden">
       
-      <div className="w-1/5 border-r border-gray-700">
+      <div className="w-1/5 border-r border-gray-700 bg-[#252526] overflow-hidden">
         <FileExplorer />
       </div>
 
-      <div className="w-3/5">
+      <div className="w-3/5 bg-[#1e1e1e] overflow-hidden">
         <CodeEditor />
       </div>
 
-      <div className="w-1/5 border-l border-gray-700">
+      <div className="w-1/5 border-l border-gray-700 bg-[#252526] overflow-hidden">
         <CopilotPanel />
       </div>
 
