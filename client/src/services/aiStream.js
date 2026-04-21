@@ -2,6 +2,7 @@ let controller = null;
 
 export const streamAIResponse = async ({
     code,
+    language,
     onChunk,
     onStart,
     onEnd,
@@ -10,7 +11,7 @@ export const streamAIResponse = async ({
     try {
         if (!code) throw new Error("Code is required");
 
-        // ❗ cancel previous stream
+        // cancel previous stream
         if (controller) controller.abort();
         controller = new AbortController();
 
@@ -22,7 +23,7 @@ export const streamAIResponse = async ({
                 "Content-Type": "application/json",
             },
             credentials: "include",
-            body: JSON.stringify({ code }),
+            body: JSON.stringify({ code, language }),
             signal: controller.signal,
         });
 

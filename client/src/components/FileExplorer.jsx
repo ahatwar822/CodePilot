@@ -55,14 +55,14 @@ const FileExplorer = () => {
     fetchData();
   }, []);
 
-  // 🔥 CLOSE MENU ON CLICK OUTSIDE
+  //  CLOSE MENU ON CLICK OUTSIDE
   useEffect(() => {
     const closeMenu = () => setMenu(null);
     window.addEventListener("click", closeMenu);
     return () => window.removeEventListener("click", closeMenu);
   }, []);
 
-  // 🔥 open file
+  //  open file
   const openFile = (file) => {
     setActiveFile(file);
     setCode(file.content || "");
@@ -74,7 +74,7 @@ const FileExplorer = () => {
     }
   };
 
-  // 🔥 create file
+  //  create file
   const createFile = async () => {
     if (!newFile) return;
 
@@ -83,7 +83,7 @@ const FileExplorer = () => {
     fetchData();
   };
 
-  // 🔥 create folder
+  //  create folder
   const createFolder = async () => {
     if (!newFolder) return;
 
@@ -92,7 +92,7 @@ const FileExplorer = () => {
     fetchData();
   };
 
-  // 🔥 right click
+  //  right click
   const handleRightClick = (e, item, type) => {
     e.preventDefault();
 
@@ -104,7 +104,7 @@ const FileExplorer = () => {
     });
   };
 
-  // 🔥 rename
+  //  rename
   const handleRename = async () => {
     const newName = prompt("Enter new name");
     if (!newName) return;
@@ -122,7 +122,7 @@ const FileExplorer = () => {
     }
   };
 
-  // 🔥 delete
+  //  delete
   const handleDelete = async () => {
     try {
       if (selectedItem.type === "file") {
@@ -138,7 +138,7 @@ const FileExplorer = () => {
     }
   };
 
-  // 🔥 render tree
+  //  render tree
   const renderTree = (node, level = 0) => {
     // FILE
     if (!node.children) {
@@ -206,7 +206,7 @@ const FileExplorer = () => {
         {tree.map((node) => renderTree(node))}
       </div>
 
-      {/* 🔥 Context Menu (GLOBAL, NOT inside tree) */}
+      {/*  Context Menu (GLOBAL, NOT inside tree) */}
       {menu && (
         <ContextMenu
           x={menu.x}
@@ -219,7 +219,7 @@ const FileExplorer = () => {
         />
       )}
 
-      {/* 🔥 Confirm Modal */}
+      {/*  Confirm Modal */}
       <ConfirmModal
         open={showModal}
         onClose={() => setShowModal(false)}
