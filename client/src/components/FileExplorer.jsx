@@ -3,9 +3,20 @@ import api from "../services/api";
 import { useFile } from "../context/FileContext";
 import { useEditor } from "../context/EditorContext";
 import { getLanguageFromFile } from "../utils/getLanguage";
+import { buildTree } from "../utils/buildTree";
+
 
 const FileExplorer = () => {
-    const { files, setFiles, folders, setFolders, openTabs, setOpenTabs, setActiveFile } = useFile();
+    const {
+        files,
+        setFiles,
+        folders,
+        setFolders,
+        openTabs,
+        setOpenTabs,
+        setActiveFile
+    } = useFile();
+
     const { setCode, setLanguage } = useEditor();
 
     const [newFile, setNewFile] = useState("");
@@ -26,9 +37,9 @@ const FileExplorer = () => {
 
     //  Open file
     const openFile = (file) => {
+        setActiveFile(file)
         setCode(file.content || "");
         setLanguage(getLanguageFromFile(file.name));
-        setActiveFile(file);
 
         // add tab if not exists
         const exists = openTabs.find((f) => f._id === file._id);
@@ -55,6 +66,34 @@ const FileExplorer = () => {
         fetchData();
     };
 
+    // render tree
+    const renderTree = (node) => {
+        // FILE
+        if (!node.children) {
+            return (
+                <div
+                    key={node._id}
+                    className="pl-4 cursor-pointer hover:bg-gray-700"
+                    onClick={() => openFile(node)}
+                >
+                    📄 {node.name}
+                </div>
+            );
+        }
+
+        // FOLDER
+        return (
+            <div key={node._id}>
+                <div className=" text-yellow-400 pl-1.5 cursor-pointer hover:bg-gray-700">
+                    📁 {node.name}
+                </div>
+                {node.files?.map((file) => renderTree(file))}
+                {node.children.map((child) => renderTree(child))}
+            </div>
+        );
+    }
+
+    const tree = buildTree(folders, files);
     return (
         <div className="p-2 text-sm">
 
@@ -82,23 +121,10 @@ const FileExplorer = () => {
                 Create Folder
             </button>
 
-            {/* Files */}
-            {files.map((file) => (
-                <div
-                    key={file._id}
-                    onClick={() => openFile(file)}
-                    className="cursor-pointer hover:bg-gray-700 p-1"
-                >
-                    📄 {file.name}
-                </div>
-            ))}
-
-            {/* Folders */}
-            {folders.map((folder) => (
-                <div key={folder._id} className="text-yellow-400">
-                    📁 {folder.name}
-                </div>
-            ))}
+            {/* TREE */}
+            <div>
+                {tree.map((node) => renderTree(node))}
+            </div>
 
         </div>
     );
