@@ -6,7 +6,7 @@ const isAuthenticated = async (req, res, next) => {
     try {
         // Get token from Authorization header or cookies
         let accessToken = req.headers.authorization?.split(' ')[1];
-        
+
         if (!accessToken) {
             accessToken = req.cookies?.accessToken;
         }
@@ -19,9 +19,9 @@ const isAuthenticated = async (req, res, next) => {
             // Try to verify access token
             const decoded = jwt.verify(
                 accessToken,
-                process.env.ACCESS_TOKEN_SECRET 
+                process.env.ACCESS_TOKEN_SECRET
             );
-            
+
             req.userId = decoded.userId;
             return next();
 
@@ -38,12 +38,12 @@ const isAuthenticated = async (req, res, next) => {
                     // Verify refresh token
                     const decoded = jwt.verify(
                         refreshToken,
-                        process.env.REFRESH_TOKEN_SECRET 
+                        process.env.REFRESH_TOKEN_SECRET
                     );
 
                     // Validate refresh token against database
                     const user = await userModel.findById(decoded.userId);
-                    
+
                     if (!user) {
                         return customError(res, 401, "User not found. Please login again.");
                     }
@@ -63,7 +63,8 @@ const isAuthenticated = async (req, res, next) => {
                     res.cookie('accessToken', newAccessToken, {
                         httpOnly: true,
                         secure: process.env.NODE_ENV === 'production',
-                        sameSite: 'strict',
+                        secure: true,
+                        sameSite: "none",
                         maxAge: 15 * 60 * 1000 // 15 minutes
                     });
 

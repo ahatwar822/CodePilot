@@ -23,7 +23,7 @@ const registerController = async (req, res) => {
         const { username, email, password } = req.body;
 
         // Validate input
-        if (!username || !email || !password ) {
+        if (!username || !email || !password) {
             return customError(res, 400, "All fields are required.");
         }
 
@@ -40,10 +40,10 @@ const registerController = async (req, res) => {
 
         // Create new user
         const newUser = await userModel.create({ username, email, password });
-        
+
         // Generate tokens
         const { accessToken, refreshToken } = generateTokens(newUser._id);
-        
+
         // Save refresh token to database
         newUser.refreshToken = refreshToken;
         await newUser.save();
@@ -52,7 +52,8 @@ const registerController = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: "none",
             maxAge: 15 * 60 * 1000
         });
 
@@ -60,7 +61,8 @@ const registerController = async (req, res) => {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -74,7 +76,7 @@ const registerController = async (req, res) => {
                 email: newUser.email
             }
         });
-        
+
     } catch (error) {
         if (error.code === 11000) {
             return customError(res, 409, "Email already registered.");
@@ -106,7 +108,7 @@ const loginController = async (req, res) => {
 
         // Generate tokens
         const { accessToken, refreshToken } = generateTokens(user._id);
-        
+
         // Save refresh token to database
         user.refreshToken = refreshToken;
         await user.save();
@@ -115,7 +117,8 @@ const loginController = async (req, res) => {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: "none",
             maxAge: 15 * 60 * 1000
         });
 
@@ -123,7 +126,8 @@ const loginController = async (req, res) => {
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: "none",
             maxAge: 7 * 24 * 60 * 60 * 1000
         });
 
@@ -174,7 +178,8 @@ const refreshTokenController = async (req, res) => {
         res.cookie('accessToken', newAccessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict',
+            secure: true,
+            sameSite: "none",
             maxAge: 15 * 60 * 1000
         });
 
@@ -195,21 +200,23 @@ const refreshTokenController = async (req, res) => {
 const logoutController = async (req, res) => {
     try {
         const userId = req.userId;
-        
+
         // Clear refresh token from database
         await userModel.findByIdAndUpdate(userId, { refreshToken: null });
-        
+
         // Clear cookies
         res.clearCookie('accessToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
+            secure: true,
+            sameSite: "none"
         });
 
         res.clearCookie('refreshToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'strict'
+            secure: true,
+            sameSite: "none"
         });
 
         return success(res, {
