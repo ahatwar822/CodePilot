@@ -12,7 +12,7 @@ const Register = () => {
     try {
       const res = await api.post("/auth/register", form);
       setUser(res.data.data.user);
-      navigate("/");
+      navigate("/editor");
     } catch (err) {
       alert(err.response?.data?.message || "Register failed");
     }
