@@ -1,83 +1,33 @@
-import { createContext, useContext, useEffect, useState, useRef } from "react";
-import api from "../services/api";
+import { createContext, useContext, useEffect, useState } from "react";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const refreshIntervalRef = useRef(null);
+  const [status, setStatus] = useState("loading");
 
-  const fetchUser = async () => {
-    try {
-      const { data } = await api.get("/user/me");
-      setUser(data.data.user);
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Automatic token refresh every 14 minutes (before 15-minute expiry)
-  const startTokenRefreshTimer = () => {
-    // Clear any existing interval
-    if (refreshIntervalRef.current) {
-      clearInterval(refreshIntervalRef.current);
-    }
-
-    // Refresh token every 14 minutes
-    refreshIntervalRef.current = setInterval(async () => {
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
       try {
-        await api.post("/auth/refresh-token");
-        console.log("Token refreshed automatically");
-      } catch (error) {
-        console.error("Token refresh failed:", error);
-        // If refresh fails, logout user
-        logout();
-      }
-    }, 14 * 60 * 1000); // 14 minutes
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  // Start token refresh timer when user logs in
-  useEffect(() => {
-    if (user) {
-      startTokenRefreshTimer();
-    } else {
-      // Clear timer when user logs out
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
-    }
-
-    // Cleanup on unmount
-    return () => {
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
+        const response = await fetch("/api/v1/user/me", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!response.ok) throw new Error("Not authenticated");
+        const data = await response.json();
+        setUser(data.user || null);
+      } catch {
+        setUser(null);
+      } finally {
+        setStatus("ready");
       }
     };
-  }, [user]);
 
-  const logout = async () => {
-    try {
-      await api.post("/auth/logout");
-    } catch (error) {
-      console.error("Logout failed:", error);
-    } finally {
-      setUser(null);
-      // Clear the refresh timer
-      if (refreshIntervalRef.current) {
-        clearInterval(refreshIntervalRef.current);
-      }
-    }
-  };
+    fetchCurrentUser();
+  }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading, logout }}>
+    <AuthContext.Provider value={{ user, status, setUser }}>
       {children}
     </AuthContext.Provider>
   );

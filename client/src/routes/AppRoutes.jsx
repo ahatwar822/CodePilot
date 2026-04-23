@@ -7,19 +7,20 @@ import ProtectedRoute from "./ProtectedRoute";
 const AppRoutes = () => {
   return (
     <Routes>
-
-      {/*  DEFAULT REDIRECT */}
+      {/* DEFAULT REDIRECT */}
       <Route path="/" element={<Navigate to="/editor" />} />
 
-      {/* Public */}
+      {/* Public Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
-      {/* Protected */}
+      {/* Protected Routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/editor" element={<Editor />} />
       </Route>
 
+      {/* Catch all - redirect to login */}
+      <Route path="*" element={<Navigate to="/login" />} />
     </Routes>
   );
 };
