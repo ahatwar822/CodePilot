@@ -26,8 +26,27 @@ export const AuthProvider = ({ children }) => {
     fetchCurrentUser();
   }, []);
 
+  const logout = async () => {
+    try {
+      // Call backend logout endpoint to clear cookies and database
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Logout failed on server");
+
+    } catch (error) {
+      console.error("Logout failed:", error);
+    } finally {
+      // Clear user state regardless of backend response
+      setUser(null);
+      setStatus("ready");
+      window.location.href = "/login";  // Or use React Router's navigate
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, status, setUser }}>
+    <AuthContext.Provider value={{ user, status, setUser, logout }}>
       {children}
     </AuthContext.Provider>
   );

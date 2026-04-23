@@ -209,14 +209,16 @@ const logoutController = async (req, res) => {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             secure: true,
-            sameSite: "none"
+            sameSite: "none",
+            maxAge: 0
         });
 
         res.clearCookie('refreshToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             secure: true,
-            sameSite: "none"
+            sameSite: "none",
+            maxAge: 0
         });
 
         return success(res, {
